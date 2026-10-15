@@ -232,3 +232,107 @@ export function Analytics() {
     </>
   );
 }
+
+// Show both property-scoped and all-review facets using the same chart components.
+export function Reviews() {
+  const [params, setParams] = useSearchParams(),
+    property = params.get("property_id") || "";
+  const state = useApi(
+      `/reviews/analytics?${query({ property_id: property })}`,
+    ),
+    catalog = useApi(property ? `/properties/${property}/amenities` : null);
+  const average = state.data?.overallAverage[0];
+  const ratings = [5, 4, 3, 2, 1].map((rating) => ({
+    rating,
+    count:
+      state.data?.ratingDistribution.find((r) => r._id === rating)?.count || 0,
+  }));
+  const max = Math.max(1, ...ratings.map((r) => r.count));
+  return (
+    <>
+      <Heading title="Reviews & property details">
+        Explore rating distribution, common feedback, and flexible amenities.
+      </Heading>
+      <div className="filters">
+        <RecordPicker
+          type="properties"
+          label="Property"
+          value={property}
+          allowAll
+          onChange={(property_id) => setParams(query({ property_id }))}
+        />
+      </div>
+      <LoadState state={state}>
+        <Metrics
+          items={[
+            [
+              "Average rating",
+              average
+                ? `${Number(average.avgRating).toFixed(2)} / 5`
+                : "No reviews",
+            ],
+            ["Reviews", average?.totalReviews || 0],
+            [
+              "Most frequent tag",
+              state.data?.topTags[0]?._id.replaceAll("_", " ") || "None",
+            ],
+          ]}
+        />
+        <div className="split">
+          <section className="card">
+            <h2>Rating distribution</h2>
+            {ratings.map((r) => (
+              <div className="bar-row" key={r.rating}>
+                <span>{r.rating} stars</span>
+                <div className="bar-track">
+                  <div style={{ width: `${(r.count / max) * 100}%` }} />
+                </div>
+                <strong>{r.count}</strong>
+              </div>
+            ))}
+          </section>
+          <section className="card">
+            <h2>Top feedback tags</h2>
+            {state.data?.topTags.length ? (
+              <div
+                className="tag-chart"
+                aria-label="Top feedback tags by number of mentions"
+              >
+                {state.data.topTags.map((tag) => (
+                  <div className="tag-bar" key={tag._id}>
+                    <div className="tag-bar-label">
+                      <span>{tag._id.replaceAll("_", " ")}</span>
+                      <strong>{tag.count}</strong>
+                    </div>
+                    <div className="bar-track">
+                      <div
+                        style={{
+                          width: `${(tag.count / Math.max(1, ...state.data.topTags.map((t) => t.count))) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No review tags yet.</p>
+            )}
+          </section>
+        </div>
+      </LoadState>
+      <section className="card">
+        <h2>Property amenities</h2>
+        {property ? (
+          <LoadState state={catalog}>
+            <Catalog data={catalog.data} />
+          </LoadState>
+        ) : (
+          <p>
+            Select a property to see its amenities, house rules and
+            accessibility details.
+          </p>
+        )}
+      </section>
+    </>
+  );
+}
