@@ -6,7 +6,7 @@ StaySpot is a web application built on the inherited Assignment 1 PostgreSQL and
 
 - **Repository:** (Add later)
 - **Final Submission commit hash:** (Add later)
-- **Demo video:** [YouTube]([https://youtu.be/_GW9OgfbMM0](https://youtu.be/_GW9OgfbMM0))
+- **Demo video:** [YouTube](https://youtu.be/_GW9OgfbMM0)
 
 ## Features
 
