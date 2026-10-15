@@ -3,11 +3,11 @@
 // Workflow 4: Multi-Faceted Review Analytics
 // ============================================================
 
-db = db.getSiblingDB("stayspot");
+db = db.getSiblingDB(process.env.STAYSPOT_MONGO_DB || "stayspot");
 
 // Use a property_id that actually exists in the seeded collection.
 // Leave null to run the analytics across all reviews.
-const propertyId = null;
+const propertyId = process.env.STAYSPOT_PROPERTY_ID || null;
 
 const matchStage = propertyId === null ? {} : { property_id: propertyId };
 

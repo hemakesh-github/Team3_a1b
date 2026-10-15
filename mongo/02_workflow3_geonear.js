@@ -5,7 +5,7 @@
 // them into distance bands. $geoNear must be the first stage.
 // ============================================================
 
-db = db.getSiblingDB("stayspot");
+db = db.getSiblingDB(process.env.STAYSPOT_MONGO_DB || "stayspot");
 
 const anchor = {
   type: "Point",

@@ -20,7 +20,7 @@ moving_avg AS (
         AVG(daily_total) OVER (
             PARTITION BY property_id
             ORDER BY booking_day
-            ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
+            RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW
         ) AS moving_avg_7d
     FROM daily_revenue
 ),
