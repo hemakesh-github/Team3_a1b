@@ -1,6 +1,6 @@
 # StaySpot — Assignment 1b
 
-CS6.302 Software System Development · Group 12 · P3: Vacation Rental & Experiences
+CS6.302 Software System Development · Team 3 · P3: Vacation Rental & Experiences
 
 StaySpot is a web application built on the inherited Assignment 1 PostgreSQL and MongoDB backend. Guests can browse properties, book stays using their wallet, and review completed stays. Staff can browse guests and inspect bookings, wallet history, property performance, search hotspots, and review analytics.
 
