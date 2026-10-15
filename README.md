@@ -4,7 +4,7 @@ CS6.302 Software System Development · Team 3 · P3: Vacation Rental & Experienc
 
 StaySpot is a web application built on the inherited Assignment 1 PostgreSQL and MongoDB backend. Guests can browse properties, book stays using their wallet, and review completed stays. Staff can browse guests and inspect bookings, wallet history, property performance, search hotspots, and review analytics.
 
-- **Repository:** (Add later)
+- **Repository:** https://github.com/hemakesh-github/Team3_a1b
 - **Final Submission commit hash:** (Add later)
 - **Demo video:** [YouTube](https://youtu.be/_GW9OgfbMM0)
 
