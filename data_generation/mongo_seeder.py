@@ -1,16 +1,19 @@
 import os
 import random
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+from postgres_seeder import connect
 
 from faker import Faker
 from pymongo import MongoClient, InsertOne
 
 fake = Faker()
 random.seed(42)
+fake.seed_instance(42)
 
 MONGO_URI = os.environ.get("STAYSPOT_MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = "stayspot"
+DB_NAME = os.environ.get("STAYSPOT_MONGO_DB", "stayspot")
 
 NUM_PROPERTIES = 1_000
 NUM_REVIEWS = 30_000
@@ -64,12 +67,12 @@ def seed_property_amenities(db, property_ids):
     db.PropertyAmenities.insert_many(docs)
 
 
-def seed_property_reviews(db, property_ids, n):
+def seed_property_reviews(db, property_ids, guest_ids, n):
     ops = []
     for _ in range(n):
         ops.append(InsertOne({
             "property_id": random.choice(property_ids),
-            "guest_id": str(uuid.uuid4()),
+            "guest_id": random.choice(guest_ids),
             "rating": random.randint(1, 5),
             "tags": random.sample(REVIEW_TAGS, k=random.randint(1, 4)),
             "comment": fake.sentence(nb_words=12),
@@ -84,7 +87,7 @@ def seed_property_reviews(db, property_ids, n):
 
 def seed_search_sessions(db, n):
     ops = []
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     for _ in range(n):
         lat, lng = random.choice(CITY_CENTERS)
         jlat, jlng = jitter_point(lat, lng)
@@ -94,7 +97,9 @@ def seed_search_sessions(db, n):
                 "type": "Point",
                 "coordinates": [round(jlng, 6), round(jlat, 6)],  # GeoJSON: [lng, lat]
             },
-            "created_at": now - timedelta(minutes=random.randint(0, 180)),
+            # Keep within the 2-hour TTL window so Workflow 3 still finds
+            # sessions during demos (TTL expireAfterSeconds: 7200).
+            "created_at": now - timedelta(minutes=random.randint(0, 110)),
         }))
         if len(ops) >= BATCH_SIZE:
             db.SearchSessions.bulk_write(ops, ordered=False)
@@ -107,13 +112,22 @@ def main():
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
 
-    property_ids = [str(uuid.uuid4()) for _ in range(NUM_PROPERTIES)]
+    if any(db[name].find_one() for name in ("PropertyAmenities", "PropertyReviews", "SearchSessions")):
+        raise RuntimeError("Refusing to append seed data: MongoDB collections are not empty.")
+    with connect() as pg:
+        with pg.cursor() as cur:
+            cur.execute("SELECT id::text FROM properties ORDER BY id LIMIT %s", (NUM_PROPERTIES,))
+            property_ids = [row[0] for row in cur.fetchall()]
+            cur.execute("SELECT id::text FROM guests ORDER BY id")
+            guest_ids = [row[0] for row in cur.fetchall()]
+    if len(property_ids) < NUM_PROPERTIES or not guest_ids:
+        raise RuntimeError("Seed PostgreSQL first: insufficient properties or guests.")
 
     print("Seeding PropertyAmenities...")
     seed_property_amenities(db, property_ids)
 
     print("Seeding PropertyReviews...")
-    seed_property_reviews(db, property_ids, NUM_REVIEWS)
+    seed_property_reviews(db, property_ids, guest_ids, NUM_REVIEWS)
 
     print("Seeding SearchSessions...")
     seed_search_sessions(db, NUM_SEARCH_SESSIONS)

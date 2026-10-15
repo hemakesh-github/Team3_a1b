@@ -1,35 +1,76 @@
+import os
 import random
+from itertools import product
 from decimal import Decimal
+from datetime import date, datetime, timedelta, timezone
 
-from datetime import date, timedelta
 import psycopg2
 from faker import Faker
 from psycopg2.extras import execute_values
 
-DB_HOST = "localhost"
-DB_NAME = "stayspot"
-DB_USER = "postgres"
-DB_PASSWORD = "Alfa@123"
+# Prefer env vars so credentials are never committed. Defaults suit Postgres.app local trust auth.
+DB_HOST = os.environ.get("STAYSPOT_PG_HOST", "localhost")
+DB_NAME = os.environ.get("STAYSPOT_PG_DB", "stayspot")
+DB_USER = os.environ.get("STAYSPOT_PG_USER", os.environ.get("USER", "postgres"))
+DB_PASSWORD = os.environ.get("STAYSPOT_PG_PASSWORD", "")
+DB_PORT = os.environ.get("STAYSPOT_PG_PORT", "5432")
 
-GUEST_COUNT = 10000
-PROPERTY_COUNT = 5000
-BOOKING_COUNT = 100000
+GUEST_COUNT = 10_000
+PROPERTY_COUNT = 5_000
+BOOKING_COUNT = 100_000
 
+random.seed(42)
 fake = Faker()
+fake.seed_instance(42)
+
+
+NAMES = (
+    "Willow", "Cedar", "Maple", "Juniper", "Laurel", "Magnolia", "Aspen",
+    "Birch", "Elm", "Oak", "Olive", "Hazel", "Rowan", "Linden", "Alder",
+    "Ivy", "Jasmine", "Clover", "Fern", "Sage", "Rose", "Dahlia", "Iris",
+    "Camellia", "Wisteria",
+)
+SETTINGS = (
+    "Courtyard", "Grove", "Terrace", "Mews", "Lane", "Place", "Court",
+    "Square", "Walk", "Park", "Circle", "Crescent", "Gardens", "Row",
+    "Way", "Corner", "Close", "Avenue", "Commons", "Heights", "Gate",
+    "Haven", "Nook", "Retreat", "House",
+)
+STAY_TYPES = (
+    "Apartment", "Studio", "Loft", "Suite", "Townhouse", "Cottage",
+    "Residence", "Flat",
+)
+
+
+def generate_property_names(count, seed=42):
+    """Return unique names without numeric suffixes or real-location claims."""
+    names = [f"{name} {setting} {kind}" for name, setting, kind
+             in product(NAMES, SETTINGS, STAY_TYPES)]
+    if not 0 <= count <= len(names):
+        raise ValueError(f"Choose between 0 and {len(names)} property names.")
+    random.Random(seed).shuffle(names)
+    return names[:count]
 
 
 def connect():
-    return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD,
-    )
+    kwargs = {
+        "host": DB_HOST,
+        "port": DB_PORT,
+        "dbname": DB_NAME,
+        "user": DB_USER,
+    }
+    if DB_PASSWORD:
+        kwargs["password"] = DB_PASSWORD
+    return psycopg2.connect(**kwargs)
 
 
 def generate_data():
     conn = connect()
     cur = conn.cursor()
+
+    cur.execute("SELECT EXISTS (SELECT 1 FROM guests)")
+    if cur.fetchone()[0]:
+        raise RuntimeError("Refusing to append seed data: guests already exist. Use an empty database.")
 
     print("Inserting guests...")
     guest_rows = [
@@ -48,12 +89,12 @@ def generate_data():
     print("Inserting properties...")
     property_rows = [
         (
-            fake.sentence(nb_words=4).rstrip("."),
+            title,
             round(random.uniform(50, 200), 2),
             random.uniform(40.70, 40.80),
             random.uniform(-74.05, -73.85),
         )
-        for _ in range(PROPERTY_COUNT)
+        for title in generate_property_names(PROPERTY_COUNT)
     ]
     property_ids = execute_values(
         cur,
@@ -79,10 +120,10 @@ def generate_data():
         nights = (check_out - check_in).days
         total_cost = (base_price * nights).quantize(Decimal("0.01"))
 
-        
-
         if balance < total_cost:
-            continue
+            # Top-ups go through the same audit trigger and guarantee progress.
+            cur.execute("UPDATE guests SET wallet_balance = wallet_balance + 10000 WHERE id = %s", (guest_id,))
+            balance += Decimal("10000")
 
         if guest_id not in checked_in and random.random() < 0.02:
             status = "CHECKED_IN"
@@ -97,12 +138,13 @@ def generate_data():
             (total_cost, guest_id),
         )
         cur.execute(
-                    """INSERT INTO bookings
-                    (guest_id, property_id, check_in, check_out, total_cost, status)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    """,
-                    (guest_id, property_id, check_in, check_out, total_cost, status),
-                )
+            """INSERT INTO bookings
+            (guest_id, property_id, check_in, check_out, total_cost, status, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (guest_id, property_id, check_in, check_out, total_cost, status,
+             datetime.now(timezone.utc) - timedelta(days=random.randint(0, 59))),
+        )
         guests[g_idx][1] = balance - total_cost
         inserted += 1
 
