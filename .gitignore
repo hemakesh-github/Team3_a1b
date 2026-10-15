@@ -1,0 +1,46 @@
+# Node dependencies, Vite output, and test coverage.
+node_modules/
+dist/
+.vite/
+coverage/
+.nyc_output/
+
+# Local environment files may contain credentials. Keep the shared template.
+.env
+.env.*
+!.env.example
+
+# Python environments and caches.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime logs.
+*.log
+
+# Local database exports. Keep SQL source scripts and performance evidence.
+/dump/
+/dumps/
+/backups/
+*.dump
+*.sql.gz
+
+# Operating-system files and editor temporary files.
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# Local assignment instructions.
+/Instructions/
+
+# Local implementation checklist.
+/plan.md
+/docs/commit_ownership.md
