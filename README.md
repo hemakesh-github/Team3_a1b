@@ -1,4 +1,4 @@
-# StaySpot — Assignment 2
+# StaySpot — Assignment 1b
 
 CS6.302 Software System Development · Group 12 · P3: Vacation Rental & Experiences
 
