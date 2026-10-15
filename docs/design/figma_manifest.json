@@ -1,0 +1,96 @@
+{
+  "fileKey": "gTOkIC3vtMfNP2le4hF9ed",
+  "url": "https://www.figma.com/design/gTOkIC3vtMfNP2le4hF9ed",
+  "frames": [
+    {
+      "id": "4:350",
+      "name": "01 · Browse properties",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "4:660",
+      "name": "02 · Property detail",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "4:771",
+      "name": "03 · Booking form",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "4:879",
+      "name": "04 · Booking success",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "4:990",
+      "name": "05 · Bookings and check-in",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "6:290",
+      "name": "06 · Guests and guest detail",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "6:436",
+      "name": "07 · Wallet and audit",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "6:571",
+      "name": "08 · Revenue analytics",
+      "width": 1440,
+      "height": 1179
+    },
+    {
+      "id": "6:702",
+      "name": "09 · Search hotspots",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "6:845",
+      "name": "10 · Reviews and amenities",
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "id": "8:516",
+      "name": "11 · Mobile browse",
+      "width": 390,
+      "height": 1100
+    },
+    {
+      "id": "8:624",
+      "name": "12 · Mobile booking",
+      "width": 390,
+      "height": 1100
+    },
+    {
+      "id": "8:665",
+      "name": "13 · Mobile map",
+      "width": 390,
+      "height": 1124
+    },
+    {
+      "id": "8:729",
+      "name": "14 · Loading, empty and error states",
+      "width": 1440,
+      "height": 1071
+    },
+    {
+      "id": "8:823",
+      "name": "15 · Visual foundations and controls",
+      "width": 1440,
+      "height": 1089
+    }
+  ]
+}
