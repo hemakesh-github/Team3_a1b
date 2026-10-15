@@ -6,9 +6,7 @@ StaySpot is a web application built on the inherited Assignment 1 PostgreSQL and
 
 - **Repository:** (Add later)
 - **Final Submission commit hash:** (Add later)
-- **Demo video:** (Add later)
-
-
+- **Demo video:** [YouTube]([https://youtu.be/_GW9OgfbMM0](https://youtu.be/_GW9OgfbMM0))
 
 ## Features
 
@@ -158,3 +156,5 @@ Suggested contribution split; confirm it matches each member's actual work befor
 | Nehal Gupta    | Property and guest browsing, detail views, and reusable controls | Browse screens, search/filter, pagination, and actor switching; loading/empty/error checks   |
 | Muppidi Reddy  | Revenue dashboard, wallet history, and chart layouts             | Moving averages, rankings, summary refresh, and audit views; analytics and date-filter tests |
 | Aditi Nigam    | Search map, reviews, amenities, and mobile layouts               | Hotspot polling, review facets, and amenities display; map, review, and responsive UI checks |
+
+
